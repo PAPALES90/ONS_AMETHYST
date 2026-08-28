@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MC-EXCHANGE LIVE | Ametist Ekonomisi</title>
+    <title>ONS_AMETHYST | Canlı Borsa</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
@@ -27,7 +27,7 @@
 <body>
 
     <div class="sidebar">
-        <div class="sidebar-header">İZLEME LİSTESİ</div>
+        <div class="sidebar-header">ONS_AMETHYST MARKET</div>
         <div class="item-card">
             <div class="item-title">🔮 AMETHYST BLOCK</div>
             <div class="item-symbol">AMT / IRO (DEMİR)</div>
@@ -37,7 +37,7 @@
     <div class="main-content">
         <div class="info-header">
             <div>
-                <div class="pair-title">AMETHYST BLOCK / IRON INGOT (AMT/IRO)</div>
+                <div class="pair-title">ONS_AMETHYST / IRON INGOT (AMT/IRO)</div>
                 <div class="price-container">
                     <span class="current-price" id="priceDisplay">5.00</span>
                     <span class="price-unit">DEMİR / ADET</span>
@@ -62,7 +62,7 @@
             data: {
                 labels: Array.from({length: 30}, (_, i) => `${30 - i}s`),
                 datasets: [{
-                    label: 'Ametist / Demir Fiyatı',
+                    label: 'ONS_AMETHYST / Demir Fiyatı',
                     data: Array(30).fill(5.00),
                     borderColor: '#26a69a',
                     borderWidth: 2,
@@ -85,13 +85,12 @@
 
         async function verileriCek() {
             try {
-                // Lokal çalışma adresi
+                // Bilgisayarında denerken bu kalsın. Render'a atınca Render adresini yazarsın:
                 const response = await fetch('http://localhost:3000/api/price');
                 const data = await response.json();
 
                 document.getElementById('priceDisplay').innerText = data.price.toFixed(2);
                 
-                // Durum bilgisini güncelle
                 const badge = document.getElementById('statusBadge');
                 if(data.state === 'PUMP') {
                     badge.innerText = '🚀 BOĞA PİYASASI (HIZLI YÜKSELİŞ)';
@@ -107,7 +106,7 @@
                 chart.data.datasets[0].data = data.history;
                 chart.update('none');
             } catch (err) {
-                console.log("Sunucu bekleniyor...");
+                console.log("Sunucu bağlantısı bekleniyor...");
             }
         }
 
