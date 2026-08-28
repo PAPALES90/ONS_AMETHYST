@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MC-EXCHANGE LIVE | Ametist Ekonomisi</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #131722; color: #d1d4dc; display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 260px; background-color: #1e222d; border-right: 1px solid #2a2e39; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 15px; font-size: 12px; font-weight: 700; color: #787b86; letter-spacing: 1px; border-bottom: 1px solid #2a2e39; }
+        .item-card { padding: 16px; background-color: #2a2e39; border-left: 4px solid #ab47bc; }
+        .item-title { font-size: 14px; font-weight: 600; color: #ffffff; }
+        .item-symbol { font-size: 11px; color: #787b86; margin-top: 4px; }
+        .main-content { flex: 1; display: flex; flex-direction: column; background-color: #131722; }
+        .info-header { padding: 20px; border-bottom: 1px solid #2a2e39; display: flex; justify-content: space-between; align-items: center; }
+        .pair-title { font-size: 20px; font-weight: 700; color: #ffffff; }
+        .price-container { display: flex; align-items: baseline; gap: 12px; margin-top: 6px; }
+        .current-price { font-size: 32px; font-weight: 800; color: #26a69a; }
+        .price-unit { font-size: 14px; color: #787b86; font-weight: 600; }
+        .badge-ai { background: rgba(38, 166, 154, 0.15); color: #26a69a; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; border: 1px solid rgba(38, 166, 154, 0.3); }
+        .chart-container { flex: 1; position: relative; padding: 20px; }
+        canvas { width: 100% !important; height: 100% !important; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">İZLEME LİSTESİ</div>
+        <div class="item-card">
+            <div class="item-title">🔮 AMETHYST BLOCK</div>
+            <div class="item-symbol">AMT / IRO (DEMİR)</div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="info-header">
+            <div>
+                <div class="pair-title">AMETHYST BLOCK / IRON INGOT (AMT/IRO)</div>
+                <div class="price-container">
+                    <span class="current-price" id="priceDisplay">5.00</span>
+                    <span class="price-unit">DEMİR / ADET</span>
+                </div>
+            </div>
+            <div class="badge-ai" id="statusBadge">⚡ CANLI PİYASA MODU</div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="onsChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('onsChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(38, 166, 154, 0.35)');
+        gradient.addColorStop(1, 'rgba(38, 166, 154, 0.0)');
+
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: 30}, (_, i) => `${30 - i}s`),
+                datasets: [{
+                    label: 'Ametist / Demir Fiyatı',
+                    data: Array(30).fill(5.00),
+                    borderColor: '#26a69a',
+                    borderWidth: 2,
+                    fill: true,
+                    backgroundColor: gradient,
+                    tension: 0.3,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { color: '#2a2e39' }, ticks: { color: '#787b86' } },
+                    y: { grid: { color: '#2a2e39' }, ticks: { color: '#787b86' } }
+                }
+            }
+        });
+
+        async function verileriCek() {
+            try {
+                // Lokal çalışma adresi
+                const response = await fetch('http://localhost:3000/api/price');
+                const data = await response.json();
+
+                document.getElementById('priceDisplay').innerText = data.price.toFixed(2);
+                
+                // Durum bilgisini güncelle
+                const badge = document.getElementById('statusBadge');
+                if(data.state === 'PUMP') {
+                    badge.innerText = '🚀 BOĞA PİYASASI (HIZLI YÜKSELİŞ)';
+                    badge.style.color = '#26a69a';
+                } else if(data.state === 'DUMP') {
+                    badge.innerText = '⚠️ AYI PİYASASI (SATIŞ/ÇÖKÜŞ)';
+                    badge.style.color = '#ef5350';
+                } else {
+                    badge.innerText = '⚡ DURAĞAN PİYASA';
+                    badge.style.color = '#26a69a';
+                }
+
+                chart.data.datasets[0].data = data.history;
+                chart.update('none');
+            } catch (err) {
+                console.log("Sunucu bekleniyor...");
+            }
+        }
+
+        setInterval(verileriCek, 2000);
+        verileriCek();
+    </script>
+</body>
+</html>
