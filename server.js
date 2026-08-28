@@ -8,33 +8,37 @@ app.use(express.static(__dirname));
 
 let currentPrice = 5.00;
 let priceHistory = Array(30).fill(5.00);
-let state = "STABLE"; 
+let state = "STABLE"; // STABLE, PUMP, DUMP
+let stableTimer = 0;  // 2 dakikalık (120 saniye) bekleme sayacı
 
-// Her 2 saniyede bir piyasayı zorunlu olarak hareket ettirir
 setInterval(() => {
-    const chance = Math.random();
-
     if (state === "STABLE") {
-        if (chance < 0.15) {
-            state = "PUMP";
-        } else if (chance < 0.25) {
-            state = "DUMP";
+        stableTimer += 2; // Her döngü 2 saniye
+
+        // 2 dakika (120 saniye) dolmadıysa sadece küçük dalgalanma yap
+        if (stableTimer < 120) {
+            currentPrice += (Math.random() - 0.5) * 0.2;
         } else {
-            // Küçük rastgele dalgalanmalar (+-0.20 arası)
-            currentPrice += (Math.random() - 0.5) * 0.4;
+            // 2 dakika dolduktan sonra %20 şansla yükseliş başlat
+            if (Math.random() < 0.20) {
+                state = "PUMP";
+            } else {
+                currentPrice += (Math.random() - 0.5) * 0.2;
+            }
         }
     } 
     else if (state === "PUMP") {
-        currentPrice += Math.random() * 2.5 + 0.5;
-        if (currentPrice >= 35.00 || Math.random() < 0.2) {
-            state = "DUMP";
+        currentPrice += Math.random() * 4.0 + 1.0; // Aniden fırla
+        if (currentPrice >= 30.00) {
+            state = "DUMP"; // Tepeden aniden çöküşe geç
         }
     } 
     else if (state === "DUMP") {
-        currentPrice -= Math.random() * 3.0 + 0.5;
+        currentPrice -= Math.random() * 5.0 + 2.0; // Sert çöküş
         if (currentPrice <= 5.00) {
             currentPrice = 5.00;
             state = "STABLE";
+            stableTimer = 0; // 2 dakikalık sayacı sıfırla
         }
     }
 
