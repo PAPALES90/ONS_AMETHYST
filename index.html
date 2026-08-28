@@ -19,7 +19,10 @@
         .price-container { display: flex; align-items: baseline; gap: 12px; margin-top: 6px; }
         .current-price { font-size: 32px; font-weight: 800; color: #26a69a; transition: color 0.3s; }
         .price-unit { font-size: 14px; color: #787b86; font-weight: 600; }
-        .badge-ai { background: rgba(38, 166, 154, 0.15); color: #26a69a; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; border: 1px solid rgba(38, 166, 154, 0.3); }
+        .header-actions { display: flex; align-items: center; gap: 10px; }
+        .btn-notify { background: #2962ff; color: #fff; border: none; padding: 8px 14px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-notify:hover { background: #1e4bd8; }
+        .badge-ai { background: rgba(38, 166, 154, 0.15); color: #26a69a; padding: 8px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; border: 1px solid rgba(38, 166, 154, 0.3); }
         .chart-container { flex: 1; position: relative; padding: 20px; }
         canvas { width: 100% !important; height: 100% !important; }
     </style>
@@ -43,7 +46,10 @@
                     <span class="price-unit">DEMİR / ADET</span>
                 </div>
             </div>
-            <div class="badge-ai" id="statusBadge">⚡ CANLI PİYASA MODU</div>
+            <div class="header-actions">
+                <button class="btn-notify" id="notifyBtn" onclick="bildirimIste()">🔔 BİLDİRİMLERİ AÇ</button>
+                <div class="badge-ai" id="statusBadge">⚡ CANLI PİYASA MODU</div>
+            </div>
         </div>
 
         <div class="chart-container">
@@ -52,6 +58,29 @@
     </div>
 
     <script>
+        let lastState = "STABLE";
+
+        // Tarayıcıdan Bildirim İzni İsteme
+        function bildirimIste() {
+            if (!("Notification" in window)) {
+                alert("Tarayıcınız bildirim özelliğini desteklemiyor.");
+                return;
+            }
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    document.getElementById('notifyBtn').innerText = "✅ BİLDİRİMLER AKTİF";
+                    document.getElementById('notifyBtn').style.background = "#2e7d32";
+                    new Notification("ONS_AMETHYST Borsa", { body: "Piyasa bildirimleri başarıyla açıldı!" });
+                }
+            });
+        }
+
+        function bildirimGonder(baslik, mesaj) {
+            if (Notification.permission === "granted") {
+                new Notification(baslik, { body: mesaj });
+            }
+        }
+
         const ctx = document.getElementById('onsChart').getContext('2d');
         const gradient = ctx.createLinearGradient(0, 0, 0, 400);
         gradient.addColorStop(0, 'rgba(38, 166, 154, 0.35)');
@@ -93,16 +122,24 @@
                 priceEl.innerText = data.price.toFixed(2);
                 
                 const badge = document.getElementById('statusBadge');
+
+                // Bildirim Tetikleyicisi
+                if (data.state === 'DUMP' && lastState !== 'DUMP') {
+                    bildirimGonder("⚠️ ACİL SATIŞ UYARISI!", `Ametist fiyatı çöküşe geçti! Güncel Fiyat: ${data.price.toFixed(2)} Demir`);
+                }
+
+                lastState = data.state;
+
                 if(data.state === 'PUMP') {
                     badge.innerText = '🚀 BOĞA PİYASASI (HIZLI YÜKSELİŞ)';
                     badge.style.color = '#26a69a';
                     priceEl.style.color = '#26a69a';
                 } else if(data.state === 'DUMP') {
-                    badge.innerText = '⚠️ AYI PİYASASI (SATIŞ/ÇÖKÜŞ)';
+                    badge.innerText = '⚠️ AYI PİYASASI (ANİ ÇÖKÜŞ)';
                     badge.style.color = '#ef5350';
                     priceEl.style.color = '#ef5350';
                 } else {
-                    badge.innerText = '⚡ CANLI PİYASA MODU';
+                    badge.innerText = '⚡ DURAĞAN PİYASA';
                     badge.style.color = '#26a69a';
                     priceEl.style.color = '#ffffff';
                 }
