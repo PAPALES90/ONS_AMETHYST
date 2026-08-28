@@ -17,7 +17,7 @@
         .info-header { padding: 20px; border-bottom: 1px solid #2a2e39; display: flex; justify-content: space-between; align-items: center; }
         .pair-title { font-size: 20px; font-weight: 700; color: #ffffff; }
         .price-container { display: flex; align-items: baseline; gap: 12px; margin-top: 6px; }
-        .current-price { font-size: 32px; font-weight: 800; color: #26a69a; }
+        .current-price { font-size: 32px; font-weight: 800; color: #26a69a; transition: color 0.3s; }
         .price-unit { font-size: 14px; color: #787b86; font-weight: 600; }
         .badge-ai { background: rgba(38, 166, 154, 0.15); color: #26a69a; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; border: 1px solid rgba(38, 166, 154, 0.3); }
         .chart-container { flex: 1; position: relative; padding: 20px; }
@@ -75,6 +75,7 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: false,
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { grid: { color: '#2a2e39' }, ticks: { color: '#787b86' } },
@@ -85,28 +86,31 @@
 
         async function verileriCek() {
             try {
-                // Bilgisayarında denerken bu kalsın. Render'a atınca Render adresini yazarsın:
-                const response = await fetch('http://localhost:3000/api/price');
+                const response = await fetch('/api/price');
                 const data = await response.json();
 
-                document.getElementById('priceDisplay').innerText = data.price.toFixed(2);
+                const priceEl = document.getElementById('priceDisplay');
+                priceEl.innerText = data.price.toFixed(2);
                 
                 const badge = document.getElementById('statusBadge');
                 if(data.state === 'PUMP') {
                     badge.innerText = '🚀 BOĞA PİYASASI (HIZLI YÜKSELİŞ)';
                     badge.style.color = '#26a69a';
+                    priceEl.style.color = '#26a69a';
                 } else if(data.state === 'DUMP') {
                     badge.innerText = '⚠️ AYI PİYASASI (SATIŞ/ÇÖKÜŞ)';
                     badge.style.color = '#ef5350';
+                    priceEl.style.color = '#ef5350';
                 } else {
-                    badge.innerText = '⚡ DURAĞAN PİYASA';
+                    badge.innerText = '⚡ CANLI PİYASA MODU';
                     badge.style.color = '#26a69a';
+                    priceEl.style.color = '#ffffff';
                 }
 
                 chart.data.datasets[0].data = data.history;
-                chart.update('none');
+                chart.update();
             } catch (err) {
-                console.log("Sunucu bağlantısı bekleniyor...");
+                console.error("Veri çekilemedi:", err);
             }
         }
 
