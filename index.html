@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="ONS-AMETHYST.ico">
     <title>ONS_AMETHYST | Canlı Borsa</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -17,6 +16,7 @@
         .sidebar-menu { display: flex; flex-direction: column; gap: 8px; padding: 15px; }
         .menu-btn { background: transparent; color: #a3a6af; border: none; padding: 12px 15px; text-align: left; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.3s; display: flex; align-items: center; gap: 8px; }
         .menu-btn:hover { background: #2a2e39; color: #ffffff; }
+        .menu-btn.active-tab { color: #26a69a; background: rgba(38, 166, 154, 0.15); }
         
         .box-container { margin: 0 15px 15px 15px; background: #131722; border: 1px solid #2a2e39; border-radius: 8px; padding: 15px; }
         .box-header { font-size: 12px; font-weight: 700; color: #ffffff; margin-bottom: 10px; border-bottom: 1px solid #2a2e39; padding-bottom: 8px; }
@@ -37,20 +37,18 @@
         .page-content { display: none; width: 100%; height: 100%; flex-direction: column; padding: 40px; }
         .page-content.active { display: flex; }
 
-        /* Ametist Kartı Tasarımı */
         .card-container { max-width: 550px; margin: 0 auto; width: 100%; }
-        .ekleme-kutusu { background-color: #1a1a24; border: 1px solid #a252c8; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); margin-bottom: 25px; }
+        .ekleme-kutusu { background-color: #1a1a24; border: 1px solid #a252c8; border-radius: 12px; padding: 20px; margin-bottom: 25px; display: none; }
         .ekleme-kutusu h3 { color: #a252c8; text-align: center; margin-bottom: 15px; }
         .form-alani { display: flex; gap: 10px; }
         .form-alani input { flex: 1; background-color: #121216; border: 1px solid #333; border-radius: 6px; color: white; padding: 10px; outline: none; }
-        .form-alani button { background-color: #a252c8; color: white; border: none; border-radius: 6px; padding: 10px 20px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .form-alani button { background-color: #a252c8; color: white; border: none; border-radius: 6px; padding: 10px 20px; cursor: pointer; font-weight: bold; }
         
         .kart-item { display: flex; align-items: center; background-color: #1a1a24; padding: 15px; border-radius: 10px; margin-top: 10px; border-left: 5px solid #a252c8; }
         .kart-item img { width: 45px; height: 45px; border-radius: 8px; margin-right: 15px; background-color: #333; }
         .kart-detay .isim { font-weight: bold; font-size: 16px; text-transform: uppercase; color: white; }
         .kart-detay .rol { color: #a252c8; font-size: 12px; margin-top: 4px; }
 
-        /* Admin Paneli Tasarımı */
         .admin-card { background: #1e222d; border: 1px solid #2a2e39; border-radius: 12px; padding: 30px; max-width: 500px; margin: 0 auto; width: 100%; text-align: center;}
         .admin-input { width: 100%; padding: 12px; background: #131722; border: 1px solid #2a2e39; color: white; border-radius: 6px; margin: 15px 0; text-align: center; outline: none;}
         .admin-btn { padding: 12px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; width: 100%; margin-bottom: 10px;}
@@ -59,19 +57,16 @@
         .btn-auto { background: #29b6f6; color: white; }
         .btn-reset { background: #787b86; color: white; }
 
-        /* Makara / Troll Menüsü */
         .troll-box { background: #2c0b0e; border: 1px solid #ef5350; border-radius: 8px; padding: 15px; margin-top: 20px; }
         .troll-box h3 { color: #ef5350; font-size: 14px; margin-bottom: 10px; text-shadow: 0 0 5px red;}
         .btn-troll { background: #000; border: 1px solid #ef5350; color: #ef5350; }
         .btn-troll:hover { background: #ef5350; color: white; }
 
-        /* Ekran Kırılma Efekti (Gizli) */
         #crackedScreen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://freepngimg.com/thumb/broken_glass/4-2-broken-glass-png-clipart.png') no-repeat center center; background-size: cover; z-index: 99999; pointer-events: none; opacity: 0.8;}
     </style>
 </head>
 <body>
 
-    <!-- Troll ve Bildirim Sesleri -->
     <audio id="alertSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
     <audio id="glassSound" src="https://www.myinstants.com/media/sounds/glass-break-sound-effect.mp3" preload="auto"></audio>
     <audio id="creepySound" src="https://www.myinstants.com/media/sounds/fnaf-1-jumpscare-sound-effect.mp3" preload="auto"></audio>
@@ -83,20 +78,17 @@
         <div class="sidebar-header">ONS_AMETHYST MARKET</div>
         <div class="item-card">
             <img src="ONS-AMETHYST.png" width="24" height="24" alt="logo" onerror="this.style.display='none'">
-            <div>
-                <div class="item-title">AMETHYST BLOCK</div>
-                <div style="font-size: 11px; color: #787b86;">AMT / IRO</div>
-            </div>
+            <div><div class="item-title">AMETHYST BLOCK</div><div style="font-size: 11px; color: #787b86;">AMT / IRO</div></div>
         </div>
         
         <div class="sidebar-menu">
-            <button class="menu-btn" id="btnGrafik" onclick="menuSec('btnGrafik', 'pageGrafik')" style="color: #26a69a; background: rgba(38, 166, 154, 0.15);">📊 Canlı Grafik</button>
+            <button class="menu-btn active-tab" id="btnGrafik" onclick="menuSec('btnGrafik', 'pageGrafik')">📊 Canlı Grafik</button>
             <button class="menu-btn" id="btnKart" onclick="menuSec('btnKart', 'pageKart')">💳 Ametist Kartı</button>
             <button class="menu-btn" id="btnAyarlar" onclick="menuSec('btnAyarlar', 'pageAyarlar')">⚙️ Piyasa Ayarları</button>
         </div>
 
         <div style="flex: 1;"></div>
-        <div class="box-container"><div class="box-header">YZ TAVSİYESİ 🤖</div><div class="advice-text" id="aiAdvice">Piyasa analiz ediliyor...</div></div>
+        <div class="box-container"><div class="box-header">YZ TAVSİYESİ 🤖</div><div class="advice-text" id="aiAdvice">Piyasalar yükleniyor...</div></div>
         <div class="box-container">
             <div class="box-header">İSTATİSTİKLER 🔮</div>
             <div class="stat-row"><span class="stat-label">En Yüksek</span><span class="stat-val" style="color: #26a69a;" id="statHigh">--</span></div>
@@ -106,19 +98,17 @@
     </div>
 
     <div class="main-content">
-        <!-- 1. GRAFİK -->
         <div id="pageGrafik" class="page-content active" style="padding:0;">
             <div class="info-header">
                 <div>
                     <h1 style="font-size: 20px; color: white; margin-bottom: 5px;">ONS_AMETHYST / IRON INGOT</h1>
-                    <span class="current-price" id="priceDisplay">5.00</span>
+                    <span class="current-price" id="priceDisplay">Yükleniyor...</span>
                     <span style="color: #787b86; font-weight: 600;"> DEMİR / ADET</span>
                 </div>
             </div>
             <div class="chart-container"><canvas id="onsChart"></canvas></div>
         </div>
 
-        <!-- 2. KART -->
         <div id="pageKart" class="page-content">
             <div class="card-container">
                 <div style="text-align: center; margin-bottom: 20px;">
@@ -126,19 +116,17 @@
                     <p style="color: #888; font-size: 14px;">Ametist Kartına sahip ayrıcalıklı oyuncular.</p>
                 </div>
                 
-                <div id="cardAddAdminSection" class="ekleme-kutusu" style="display: none;">
+                <div id="cardAddAdminSection" class="ekleme-kutusu">
                     <h3>+ Yeni Ametist Kart Sahibi Ekle</h3>
                     <div class="form-alani">
                         <input type="text" id="kullaniciInput" placeholder="Oyuncu Adı (Örn: Voxtare)">
                         <button onclick="kartSahibiEkle()">Karta Ekle</button>
                     </div>
                 </div>
-                <!-- Kartlar Sunucudan Çekilip Buraya Doldurulacak -->
                 <div id="kartListesi"></div> 
             </div>
         </div>
 
-        <!-- 3. AYARLAR -->
         <div id="pageAyarlar" class="page-content">
             <div class="admin-card">
                 <h2 style="color: white; margin-bottom: 10px;">🔒 Yönetici Girişi</h2>
@@ -150,16 +138,15 @@
 
                 <div id="controlsSection" style="display: none;">
                     <p style="color:#26a69a; font-size:13px; font-weight:bold; margin-bottom:15px;">✓ Yönetici Doğrulandı</p>
-                    <button class="admin-btn btn-pump" onclick="sunucuyaGonder('PUMP')">🚀 PUMP BAŞLAT (Fiyatı Yükselt)</button>
-                    <button class="admin-btn btn-dump" onclick="sunucuyaGonder('DUMP')">⚠️ DUMP BAŞLAT (Fiyatı Düşür)</button>
-                    <button class="admin-btn btn-auto" onclick="sunucuyaGonder('AUTO')">🤖 OTOMATİK MODA AL (YZ)</button>
-                    <button class="admin-btn btn-reset" onclick="sunucuyaGonder('RESET')">🔄 Fiyatı Resetle (5.00 yap)</button>
+                    <button class="admin-btn btn-pump" onclick="sunucuyaGonder('PUMP')">🚀 PUMP BAŞLAT</button>
+                    <button class="admin-btn btn-dump" onclick="sunucuyaGonder('DUMP')">⚠️ DUMP BAŞLAT</button>
+                    <button class="admin-btn btn-auto" onclick="sunucuyaGonder('AUTO')">🤖 OTOMATİK MODA AL</button>
+                    <button class="admin-btn btn-reset" onclick="sunucuyaGonder('RESET')">🔄 Fiyatı Resetle</button>
                     
-                    <!-- SMP Admin Trol Menüsü -->
                     <div class="troll-box">
                         <h3>🤡 TROLL MENÜSÜ (Herkese Gider)</h3>
                         <button class="admin-btn btn-troll" onclick="sunucuyaGonder('TROLL_CRACK')">💥 Ekran Kırma & Jumpscare</button>
-                        <button class="admin-btn btn-troll" onclick="sunucuyaGonder('TROLL_HACK')">💀 Sahte "Sistem Çöktü" Uyarısı</button>
+                        <button class="admin-btn btn-troll" onclick="sunucuyaGonder('TROLL_HACK')">💀 Sahte Sistem Çöktü Uyarısı</button>
                     </div>
                 </div>
             </div>
@@ -167,13 +154,11 @@
     </div>
 
     <script>
-        let isAdminLoggedIn = false;
-        let cizilenKartlar = []; // Gereksiz re-render önlemek için
+        let cizilenKartlar = []; 
 
         function menuSec(btnId, pageId) {
-            document.querySelectorAll('.menu-btn').forEach(b => { b.style.color = '#a3a6af'; b.style.background = 'transparent'; });
-            document.getElementById(btnId).style.color = '#26a69a';
-            document.getElementById(btnId).style.background = 'rgba(38, 166, 154, 0.15)';
+            document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active-tab'));
+            document.getElementById(btnId).classList.add('active-tab');
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
         }
@@ -181,7 +166,6 @@
         function adminGirisYap() {
             const pass = document.getElementById('adminPassInput').value.trim();
             if (pass === "asvbnajknsgfkasgsf123" || pass === "asvbnakjknsgfkasgsf123" || pass === "asvbnajknsgfaksgsf123") {
-                isAdminLoggedIn = true;
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('controlsSection').style.display = 'block';
                 document.getElementById('loginError').style.display = 'none';
@@ -217,7 +201,6 @@
             setTimeout(() => { toast.classList.remove('show'); }, 4000);
         }
 
-        // TROLL SİSTEMİ
         function tetikleTroll(trollTuru) {
             if (trollTuru === 'TROLL_CRACK') {
                 document.getElementById('crackedScreen').style.display = 'block';
@@ -230,7 +213,6 @@
             }
         }
 
-        // Grafik
         const ctx = document.getElementById('onsChart').getContext('2d');
         const chart = new Chart(ctx, {
             type: 'line',
@@ -238,13 +220,11 @@
             options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#2a2e39' } }, y: { grid: { color: '#2a2e39' } } } }
         });
 
-        // Sunucudan Düzenli Veri Çekme (Senkronizasyon)
         async function verileriCek() {
             try {
                 const response = await fetch('/api/price');
                 const data = await response.json();
 
-                // Fiyatı ve Stats'ı Güncelle
                 document.getElementById('priceDisplay').innerText = data.price.toFixed(2);
                 document.getElementById('statHigh').innerText = data.high;
                 document.getElementById('statLow').innerText = data.low;
@@ -253,13 +233,11 @@
                 chart.data.datasets[0].data = data.history;
                 chart.update();
 
-                // Makara/Troll Kontrolü
                 if (data.troll) tetikleTroll(data.troll);
 
-                // Kartları Güncelle (Refresh atılsa bile sunucudan çekip ekrana basar)
-                if (data.kartlar && data.kartlar.length !== cizilenKartlar.length) {
+                if (data.kartlar && JSON.stringify(data.kartlar) !== JSON.stringify(cizilenKartlar)) {
                     const liste = document.getElementById("kartListesi");
-                    liste.innerHTML = ""; // Temizle
+                    liste.innerHTML = ""; 
                     data.kartlar.forEach(isim => {
                         liste.innerHTML += `
                             <div class="kart-item">
@@ -271,12 +249,11 @@
                             </div>
                         `;
                     });
-                    cizilenKartlar = data.kartlar;
+                    cizilenKartlar = [...data.kartlar];
                 }
             } catch (err) {}
         }
-
-        setInterval(verileriCek, 2000); // Herkes 2 saniyede bir aynı veriyi alır
+        setInterval(verileriCek, 2000); 
         verileriCek();
     </script>
 </body>
