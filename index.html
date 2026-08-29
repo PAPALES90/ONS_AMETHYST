@@ -20,9 +20,7 @@
             animation: fadeUp 1s cubic-bezier(0.23, 1, 0.32, 1) forwards;
         }
 
-        @keyframes fadeUp {
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
         
         .sidebar { width: 280px; background-color: #1e222d; border-right: 1px solid #2a2e39; display: flex; flex-direction: column; }
         .sidebar-header { padding: 15px; font-size: 12px; font-weight: 700; color: #787b86; border-bottom: 1px solid #2a2e39; }
@@ -52,8 +50,19 @@
 
         .page-content { display: none; width: 100%; height: 100%; flex-direction: column; padding: 40px; }
         .page-content.active { display: flex; }
+
+        /* Cüzdan Paneli Tasarımı */
+        .wallet-card { background: #1e222d; border: 1px solid #2a2e39; border-radius: 12px; padding: 30px; max-width: 550px; margin: 0 auto; width: 100%; text-align: center;}
+        .wallet-input { width: 100%; padding: 12px; background: #131722; border: 1px solid #2a2e39; color: white; border-radius: 6px; margin: 15px 0; font-size: 14px; text-align: center; }
+        .wallet-btn { padding: 12px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; width: 100%; margin-bottom: 10px; background: #ab47bc; color: white;}
+        .wallet-btn:hover { opacity: 0.85; }
+
+        .user-profile { display: flex; align-items: center; gap: 15px; background: #131722; padding: 15px; border-radius: 8px; border: 1px solid #2a2e39; margin-bottom: 20px; text-align: left;}
+        .user-avatar { width: 48px; height: 48px; border-radius: 6px; background: #2a2e39; }
         
-        .placeholder-text { margin: auto; color: #787b86; font-size: 18px; font-weight: 600; text-align: center;}
+        .inventory-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .inv-box { background: #131722; border: 1px solid #2a2e39; padding: 15px; border-radius: 8px; text-align: center; }
+        .inv-val { font-size: 22px; font-weight: bold; color: #fff; margin-top: 5px; }
 
         /* Admin Paneli Tasarımı */
         .admin-card { background: #1e222d; border: 1px solid #2a2e39; border-radius: 12px; padding: 30px; max-width: 500px; margin: 0 auto; width: 100%; text-align: center;}
@@ -63,7 +72,6 @@
         .btn-dump { background: #ef5350; color: white; }
         .btn-auto { background: #29b6f6; color: white; }
         .btn-reset { background: #787b86; color: white; }
-        .admin-btn:hover { opacity: 0.85; }
     </style>
 </head>
 <body>
@@ -85,7 +93,7 @@
         
         <div class="sidebar-menu">
             <button class="menu-btn" id="btnGrafik" onclick="menuSec('btnGrafik', 'pageGrafik')" style="color: #26a69a; background: rgba(38, 166, 154, 0.15);">📊 Canlı Grafik</button>
-            <button class="menu-btn" id="btnCuzdan" onclick="menuSec('btnCuzdan', 'pageCuzdan')">💼 Cüzdanım (Yakında)</button>
+            <button class="menu-btn" id="btnCuzdan" onclick="menuSec('btnCuzdan', 'pageCuzdan')">💼 Cüzdanım</button>
             <button class="menu-btn" id="btnAyarlar" onclick="menuSec('btnAyarlar', 'pageAyarlar')">⚙️ Piyasa Ayarları</button>
         </div>
 
@@ -119,26 +127,56 @@
 
         <!-- 2. CÜZDAN SAYFASI -->
         <div id="pageCuzdan" class="page-content">
-            <div class="placeholder-text">
-                💼<br><br>Cüzdan Sistemi Yapım Aşamasında<br>
-                <span style="font-size: 14px; font-weight: normal; margin-top:10px; display:inline-block;">Yakında oyun içi hesaplar ile senkronize edilecek.</span>
+            <div class="wallet-card">
+                <h2 style="color: white; margin-bottom: 10px;">💼 Minecraft Cüzdan Bağlantısı</h2>
+                
+                <!-- Kod Girme Alanı -->
+                <div id="walletLoginSection">
+                    <p style="font-size: 13px; color: #787b86;">Oyunda <b>/borsa baglan</b> yazarak aldığınız kodu buraya girin.</p>
+                    <input type="text" id="walletCodeInput" class="wallet-input" placeholder="Örn: AMT-989263">
+                    <button class="wallet-btn" onclick="cuzdanBagla()">Hesabı Bağla</button>
+                </div>
+
+                <!-- Bağlı Hesap Profili ve Envanter -->
+                <div id="walletConnectedSection" style="display: none;">
+                    <div class="user-profile">
+                        <!-- Crafatar servisi ile gerçek MC skin kafası çeker -->
+                        <img id="userHead" class="user-avatar" src="https://crafatar.com/avatars/steve?size=48&overlay" alt="Skin">
+                        <div>
+                            <div style="font-size: 12px; color: #787b86;">Bağlı Hesap</div>
+                            <div id="userNameDisplay" style="font-size: 18px; font-weight: bold; color: #fff;">Oyuncu</div>
+                        </div>
+                    </div>
+
+                    <div class="inventory-grid">
+                        <div class="inv-box">
+                            <span style="font-size: 12px; color: #787b86;">Oyun İçi Demir Bakiyesi</span>
+                            <div class="inv-val" style="color: #e0e0e0;" id="userIron">64</div>
+                        </div>
+                        <div class="inv-box">
+                            <span style="font-size: 12px; color: #787b86;">Ametist Stoku</span>
+                            <div class="inv-val" style="color: #ab47bc;" id="userAmethyst">12</div>
+                        </div>
+                    </div>
+
+                    <button class="wallet-btn" style="background: #26a69a;" onclick="alert('Alım emri Minecraft sunucusuna iletildi!')">⚡ 1 Adet Ametist Satın Al</button>
+                    <button class="wallet-btn" style="background: #ef5350;" onclick="alert('Satış emri Minecraft sunucusuna iletildi!')">💎 1 Adet Ametist Sat</button>
+                </div>
             </div>
         </div>
 
-        <!-- 3. PİYASA AYARLARI (ŞİFRELİ ADMİN PANELİ) -->
+        <!-- 3. PİYASA AYARLARI -->
         <div id="pageAyarlar" class="page-content">
             <div class="admin-card">
                 <h2 style="color: white; margin-bottom: 10px;">🔒 Yönetici Girişi</h2>
                 <p style="font-size: 13px; color: #787b86;">Piyasa ayarlarını değiştirmek için yönetici şifresini girin.</p>
 
-                <!-- Şifre Formu -->
                 <div id="loginSection">
                     <input type="password" id="adminPassInput" class="admin-input" placeholder="Yönetici Şifreniz">
                     <button class="admin-btn btn-pump" onclick="adminGirisYap()">Giriş Yap</button>
                     <p id="loginError" style="color:#ef5350; font-size:12px; display:none; margin-top:5px;">Hatalı Şifre!</p>
                 </div>
 
-                <!-- Kontrol Paneli (Giriş yapınca görünür) -->
                 <div id="controlsSection" style="display: none;">
                     <p style="color:#26a69a; font-size:13px; font-weight:bold; margin-bottom:15px;">✓ Yönetici Doğrulandı</p>
                     <button class="admin-btn btn-pump" onclick="piyasaMudahale('PUMP')">🚀 PUMP BAŞLAT (Fiyatı Yükselt)</button>
@@ -151,8 +189,6 @@
     </div>
 
     <script>
-        let isAuthorized = false;
-
         function menuSec(btnId, pageId) {
             document.querySelectorAll('.menu-btn').forEach(btn => {
                 btn.style.color = '#a3a6af';
@@ -166,11 +202,27 @@
             document.getElementById(pageId).classList.add('active');
         }
 
-        // Admin Giriş Kontrolü
+        // Cüzdan Bağlantı Simülasyonu
+        function cuzdanBagla() {
+            const code = document.getElementById('walletCodeInput').value.trim();
+            if (code === "") {
+                alert("Lütfen bir kod girin!");
+                return;
+            }
+
+            // Test Kodun: AMT-989263
+            document.getElementById('walletLoginSection').style.display = 'none';
+            document.getElementById('walletConnectedSection').style.display = 'block';
+
+            // Oyuncu adını ve skinini bağla
+            const mockPlayerName = "Omer_Player"; 
+            document.getElementById('userNameDisplay').innerText = mockPlayerName;
+            document.getElementById('userHead').src = `https://crafatar.com/avatars/${mockPlayerName}?size=48&overlay`;
+        }
+
         function adminGirisYap() {
             const pass = document.getElementById('adminPassInput').value;
             if (pass === "asvbnajknsgfkasgsf123") {
-                isAuthorized = true;
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('controlsSection').style.display = 'block';
                 document.getElementById('loginError').style.display = 'none';
@@ -179,7 +231,6 @@
             }
         }
 
-        // Sunucuya Piyasa Müdahale İsteği Atma
         async function piyasaMudahale(action) {
             const pass = document.getElementById('adminPassInput').value;
             try {
@@ -189,14 +240,8 @@
                     body: JSON.stringify({ password: pass, action: action })
                 });
                 const resData = await response.json();
-                if(resData.success) {
-                    alert("Başarılı: " + resData.message);
-                } else {
-                    alert("Hata: " + resData.message);
-                }
-            } catch (err) {
-                alert("Sunucuyla bağlantı kurulamadı!");
-            }
+                alert(resData.message);
+            } catch (err) { alert("Sunucu hatası!"); }
         }
 
         const ctx = document.getElementById('onsChart').getContext('2d');
@@ -227,12 +272,10 @@
         function showToast(message, color) {
             const toast = document.getElementById('toastMessage');
             const sound = document.getElementById('alertSound');
-            
             toast.innerHTML = message;
             toast.style.borderLeftColor = color;
             toast.classList.add('show');
-            sound.play().catch(e => console.log("Ses oynatımı için sayfaya tıklanmalı."));
-
+            sound.play().catch(e => {});
             setTimeout(() => { toast.classList.remove('show'); }, 4000);
         }
 
