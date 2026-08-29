@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Sekme İkonu -->
     <link rel="icon" type="image/x-icon" href="ONS-AMETHYST.ico">
     <title>ONS_AMETHYST | Canlı Borsa</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         
-        /* Aşağıdan Yukarıya Smooth Açılış Animasyonu */
         body { 
             background-color: #131722; 
             color: #d1d4dc; 
@@ -35,7 +33,6 @@
         .menu-btn { background: transparent; color: #a3a6af; border: none; padding: 12px 15px; text-align: left; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
         .menu-btn:hover { background: #2a2e39; color: #ffffff; }
         
-        /* Kutular */
         .box-container { margin: 0 15px 15px 15px; background: #131722; border: 1px solid #2a2e39; border-radius: 8px; padding: 15px; }
         .box-header { font-size: 12px; font-weight: 700; color: #ffffff; margin-bottom: 10px; border-bottom: 1px solid #2a2e39; padding-bottom: 8px; }
         .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; }
@@ -50,20 +47,27 @@
         .chart-container { flex: 1; position: relative; padding: 20px; }
         canvas { width: 100% !important; height: 100% !important; }
 
-        /* Sağ Üst Bildirim Balonu (Toast) */
         .toast { position: fixed; top: 20px; right: -400px; background: #2a2e39; border-left: 4px solid #ef5350; color: white; padding: 15px 20px; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-weight: bold; font-size: 14px; transition: right 0.4s ease; z-index: 9999; }
         .toast.show { right: 20px; }
 
-        /* Sayfa İçerikleri Kontrolü */
-        .page-content { display: none; width: 100%; height: 100%; flex-direction: column;}
+        .page-content { display: none; width: 100%; height: 100%; flex-direction: column; padding: 40px; }
         .page-content.active { display: flex; }
         
         .placeholder-text { margin: auto; color: #787b86; font-size: 18px; font-weight: 600; text-align: center;}
+
+        /* Admin Paneli Tasarımı */
+        .admin-card { background: #1e222d; border: 1px solid #2a2e39; border-radius: 12px; padding: 30px; max-width: 500px; margin: 0 auto; width: 100%; text-align: center;}
+        .admin-input { width: 100%; padding: 12px; background: #131722; border: 1px solid #2a2e39; color: white; border-radius: 6px; margin: 15px 0; font-size: 14px; text-align: center; }
+        .admin-btn { padding: 12px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; width: 100%; margin-bottom: 10px;}
+        .btn-pump { background: #26a69a; color: white; }
+        .btn-dump { background: #ef5350; color: white; }
+        .btn-auto { background: #29b6f6; color: white; }
+        .btn-reset { background: #787b86; color: white; }
+        .admin-btn:hover { opacity: 0.85; }
     </style>
 </head>
 <body>
 
-    <!-- Çan Sesi -->
     <audio id="alertSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <div id="toastMessage" class="toast">⚠️ BİLDİRİM EKRANI</div>
@@ -72,7 +76,6 @@
         <div class="sidebar-header">ONS_AMETHYST MARKET</div>
         
         <div class="item-card">
-            <!-- PNG formatına çevrilmiş logoyu çağırıyoruz -->
             <img src="ONS-AMETHYST.png" width="24" height="24" alt="logo">
             <div>
                 <div class="item-title">AMETHYST BLOCK</div>
@@ -88,7 +91,6 @@
 
         <div style="flex: 1;"></div>
 
-        <!-- Yapay Zeka Tavsiyesi -->
         <div class="box-container">
             <div class="box-header">YZ TAVSİYESİ 🤖</div>
             <div class="advice-text" id="aiAdvice">Piyasa analiz ediliyor...</div>
@@ -103,8 +105,8 @@
     </div>
 
     <div class="main-content">
-        <!-- 1. Sayfa: GRAFİK EKRANI -->
-        <div id="pageGrafik" class="page-content active">
+        <!-- 1. GRAFİK SAYFASI -->
+        <div id="pageGrafik" class="page-content active" style="padding:0;">
             <div class="info-header">
                 <div>
                     <h1 style="font-size: 20px; color: white; margin-bottom: 5px;">ONS_AMETHYST / IRON INGOT</h1>
@@ -115,7 +117,7 @@
             <div class="chart-container"><canvas id="onsChart"></canvas></div>
         </div>
 
-        <!-- 2. Sayfa: CÜZDAN EKRANI -->
+        <!-- 2. CÜZDAN SAYFASI -->
         <div id="pageCuzdan" class="page-content">
             <div class="placeholder-text">
                 💼<br><br>Cüzdan Sistemi Yapım Aşamasında<br>
@@ -123,30 +125,78 @@
             </div>
         </div>
 
-        <!-- 3. Sayfa: AYARLAR EKRANI -->
+        <!-- 3. PİYASA AYARLARI (ŞİFRELİ ADMİN PANELİ) -->
         <div id="pageAyarlar" class="page-content">
-            <div class="placeholder-text">
-                ⚙️<br><br>Piyasa Ayarları Yakında Eklenecek
+            <div class="admin-card">
+                <h2 style="color: white; margin-bottom: 10px;">🔒 Yönetici Girişi</h2>
+                <p style="font-size: 13px; color: #787b86;">Piyasa ayarlarını değiştirmek için yönetici şifresini girin.</p>
+
+                <!-- Şifre Formu -->
+                <div id="loginSection">
+                    <input type="password" id="adminPassInput" class="admin-input" placeholder="Yönetici Şifreniz">
+                    <button class="admin-btn btn-pump" onclick="adminGirisYap()">Giriş Yap</button>
+                    <p id="loginError" style="color:#ef5350; font-size:12px; display:none; margin-top:5px;">Hatalı Şifre!</p>
+                </div>
+
+                <!-- Kontrol Paneli (Giriş yapınca görünür) -->
+                <div id="controlsSection" style="display: none;">
+                    <p style="color:#26a69a; font-size:13px; font-weight:bold; margin-bottom:15px;">✓ Yönetici Doğrulandı</p>
+                    <button class="admin-btn btn-pump" onclick="piyasaMudahale('PUMP')">🚀 PUMP BAŞLAT (Fiyatı Yükselt)</button>
+                    <button class="admin-btn btn-dump" onclick="piyasaMudahale('DUMP')">⚠️ DUMP BAŞLAT (Fiyatı Düşür)</button>
+                    <button class="admin-btn btn-auto" onclick="piyasaMudahale('AUTO')">🤖 OTOMATİK MODA AL (YZ)</button>
+                    <button class="admin-btn btn-reset" onclick="piyasaMudahale('RESET')">🔄 Fiyatı Resetle (5.00 yap)</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Sol Menü Tıklama Sistemi
+        let isAuthorized = false;
+
         function menuSec(btnId, pageId) {
-            // Buton renklerini sıfırla
             document.querySelectorAll('.menu-btn').forEach(btn => {
                 btn.style.color = '#a3a6af';
                 btn.style.background = 'transparent';
             });
-            // Tıklanan butonu renklendir
             const aktifBtn = document.getElementById(btnId);
             aktifBtn.style.color = '#26a69a';
             aktifBtn.style.background = 'rgba(38, 166, 154, 0.15)';
 
-            // Sayfaları gizle ve seçileni göster
             document.querySelectorAll('.page-content').forEach(page => page.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
+        }
+
+        // Admin Giriş Kontrolü
+        function adminGirisYap() {
+            const pass = document.getElementById('adminPassInput').value;
+            if (pass === "asvbnajknsgfkasgsf123") {
+                isAuthorized = true;
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('controlsSection').style.display = 'block';
+                document.getElementById('loginError').style.display = 'none';
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        // Sunucuya Piyasa Müdahale İsteği Atma
+        async function piyasaMudahale(action) {
+            const pass = document.getElementById('adminPassInput').value;
+            try {
+                const response = await fetch('/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pass, action: action })
+                });
+                const resData = await response.json();
+                if(resData.success) {
+                    alert("Başarılı: " + resData.message);
+                } else {
+                    alert("Hata: " + resData.message);
+                }
+            } catch (err) {
+                alert("Sunucuyla bağlantı kurulamadı!");
+            }
         }
 
         const ctx = document.getElementById('onsChart').getContext('2d');
@@ -174,7 +224,6 @@
 
         let lastState = "STABLE";
 
-        // Bildirim Balonu
         function showToast(message, color) {
             const toast = document.getElementById('toastMessage');
             const sound = document.getElementById('alertSound');
@@ -182,14 +231,11 @@
             toast.innerHTML = message;
             toast.style.borderLeftColor = color;
             toast.classList.add('show');
-            
-            // Kullanıcı sayfayla etkileşime girmeden ses çalmayabilir (Tarayıcı politikası)
-            sound.play().catch(e => console.log("Ses için sayfaya tıklanması gerekebilir."));
+            sound.play().catch(e => console.log("Ses oynatımı için sayfaya tıklanmalı."));
 
             setTimeout(() => { toast.classList.remove('show'); }, 4000);
         }
 
-        // Rastgele Tavsiyeler (10 Saniyede Bir)
         setInterval(() => {
             const randomMsg = sentences[Math.floor(Math.random() * sentences.length)];
             document.getElementById('aiAdvice').innerText = `"${randomMsg}"`;
@@ -207,7 +253,6 @@
                 document.getElementById('statLow').innerText = data.stats.low;
                 document.getElementById('statVol').innerText = data.stats.vol.toLocaleString() + ' AMT';
 
-                // PUMP / DUMP Algılayıcısı
                 if (data.state === 'PUMP' && lastState !== 'PUMP') {
                     showToast("🚀 YÜKSELİŞ BAŞLADI: Her şey artıyor, piyasayı izle!", "#26a69a");
                     priceEl.style.color = '#26a69a';
