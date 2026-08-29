@@ -1,16 +1,15 @@
 const express = require('express');
-const app = express();
 const path = require('path');
+const app = express();
 
 app.use(express.json());
+// HTML, CSS ve ikonların klasörden düzgün okunması için statik dosya izni:
 app.use(express.static(__dirname)); 
 
-// GLOBAL PİYASA VE SUNUCU HAFIZASI
 let piyasa = { price: 5.00, history: Array(30).fill(5.00), state: 'STABLE', high: 5.00, low: 5.00, vol: 15420 };
-let trollEvent = null; // Jumpscare ve şakalar için tetikleyici
-let kartSahipleri = ["PAPALES90"]; // Sayfa yenilense de isimler burada tutulur
+let trollEvent = null; 
+let kartSahipleri = ["PAPALES90"]; 
 
-// Fiyat herkese aynı gitsin diye sadece sunucuda tek bir döngüde hesaplanır
 setInterval(() => {
     if (piyasa.state === 'PUMP') piyasa.price += (Math.random() * 0.4) + 0.1;
     else if (piyasa.state === 'DUMP') piyasa.price -= (Math.random() * 0.4) + 0.1;
@@ -25,29 +24,28 @@ setInterval(() => {
     piyasa.vol += Math.floor(Math.random() * 50);
 }, 2000);
 
-// Sitedeki herkes bu veriyi çeker
-app.get('/api/price', (req, res) => {
-    res.json({ ...piyasa, troll: trollEvent, kartlar: kartSahipleri });
-    trollEvent = null; // Troll olayı bir kere çalıştıktan sonra herkeste susması için sıfırlanır
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Admin Paneli İşlemleri
+app.get('/api/price', (req, res) => {
+    res.json({ ...piyasa, troll: trollEvent, kartlar: kartSahipleri });
+    trollEvent = null; 
+});
+
 app.post('/api/admin', (req, res) => {
     const { password, action, isim } = req.body;
     
-    // Şifre kontrolü
     if (password !== "asvbnajknsgfkasgsf123" && password !== "asvbnakjknsgfkasgsf123" && password !== "asvbnajknsgfaksgsf123") {
         return res.status(401).json({ message: "Hatalı şifre!" });
     }
 
-    // Piyasa Yönlendirmeleri
     if (['PUMP', 'DUMP', 'AUTO', 'RESET'].includes(action)) {
         piyasa.state = action;
         if (action === 'RESET') { piyasa.price = 5.00; piyasa.state = 'STABLE'; }
         return res.json({ message: "Piyasa yönü değiştirildi!" });
     }
     
-    // Kalıcı Kart Ekleme
     if (action === 'KART_EKLE') {
         if (isim && !kartSahipleri.includes(isim)) {
             kartSahipleri.push(isim);
@@ -56,13 +54,12 @@ app.post('/api/admin', (req, res) => {
         return res.json({ message: "Zaten ekli veya geçersiz isim." });
     }
 
-    // TROLL Butonları
     if (action.startsWith('TROLL_')) {
         trollEvent = action;
         return res.json({ message: "Troll saldırısı tüm oyunculara gönderildi! 😈" });
     }
 
-    res.json({ message: "İşlem algılanamadı." });
+    res.json({ message: "Bilinmeyen işlem." });
 });
 
-app.listen(3000, () => console.log('Borsa SMP Sunucusu 3000 portunda aktif!'));
+app.listen(3000, () => console.log('Borsa sistemi 3000 portunda aktif! (http://localhost:3000 adresine girin)'));
