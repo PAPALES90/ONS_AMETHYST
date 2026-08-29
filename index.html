@@ -3,13 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Senin hazırladığın ICO dosyasını bağladık -->
+    <!-- Sekme İkonu -->
     <link rel="icon" type="image/x-icon" href="ONS-AMETHYST.ico">
     <title>ONS_AMETHYST | Canlı Borsa</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: #131722; color: #d1d4dc; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Aşağıdan Yukarıya Smooth Açılış Animasyonu */
+        body { 
+            background-color: #131722; 
+            color: #d1d4dc; 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 1s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
         
         .sidebar { width: 280px; background-color: #1e222d; border-right: 1px solid #2a2e39; display: flex; flex-direction: column; }
         .sidebar-header { padding: 15px; font-size: 12px; font-weight: 700; color: #787b86; border-bottom: 1px solid #2a2e39; }
@@ -17,44 +32,48 @@
         
         .item-title { font-size: 14px; font-weight: 600; color: #ffffff; }
         .sidebar-menu { display: flex; flex-direction: column; gap: 8px; padding: 15px; }
-        .menu-btn { background: transparent; color: #a3a6af; border: none; padding: 12px 15px; text-align: left; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: 0.2s; }
+        .menu-btn { background: transparent; color: #a3a6af; border: none; padding: 12px 15px; text-align: left; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
         .menu-btn:hover { background: #2a2e39; color: #ffffff; }
         
-        /* Kutu Tasarımları */
+        /* Kutular */
         .box-container { margin: 0 15px 15px 15px; background: #131722; border: 1px solid #2a2e39; border-radius: 8px; padding: 15px; }
         .box-header { font-size: 12px; font-weight: 700; color: #ffffff; margin-bottom: 10px; border-bottom: 1px solid #2a2e39; padding-bottom: 8px; }
         .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; }
         .stat-label { color: #787b86; }
         .stat-val { color: #ffffff; font-weight: 600; }
         
-        /* Tavsiye Kutusu */
         .advice-text { font-size: 13px; color: #eebb12; font-weight: 600; font-style: italic; line-height: 1.4; }
 
-        /* Ana İçerik */
-        .main-content { flex: 1; display: flex; flex-direction: column; }
+        .main-content { flex: 1; display: flex; flex-direction: column; position: relative;}
         .info-header { padding: 20px; border-bottom: 1px solid #2a2e39; display: flex; justify-content: space-between; }
-        .current-price { font-size: 32px; font-weight: 800; color: #26a69a; }
+        .current-price { font-size: 32px; font-weight: 800; color: #26a69a; transition: color 0.3s;}
         .chart-container { flex: 1; position: relative; padding: 20px; }
         canvas { width: 100% !important; height: 100% !important; }
 
-        /* Animasyonlu Bildirim Balonu (Toast) */
-        .toast { position: fixed; top: 20px; right: -350px; background: #2a2e39; border-left: 4px solid #ef5350; color: white; padding: 15px 20px; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-weight: bold; font-size: 14px; transition: right 0.4s ease; z-index: 9999; display: flex; align-items: center; gap: 10px;}
+        /* Sağ Üst Bildirim Balonu (Toast) */
+        .toast { position: fixed; top: 20px; right: -400px; background: #2a2e39; border-left: 4px solid #ef5350; color: white; padding: 15px 20px; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-weight: bold; font-size: 14px; transition: right 0.4s ease; z-index: 9999; }
         .toast.show { right: 20px; }
+
+        /* Sayfa İçerikleri Kontrolü */
+        .page-content { display: none; width: 100%; height: 100%; flex-direction: column;}
+        .page-content.active { display: flex; }
+        
+        .placeholder-text { margin: auto; color: #787b86; font-size: 18px; font-weight: 600; text-align: center;}
     </style>
 </head>
 <body>
 
-    <!-- Bildirim Sesi (Hazır bir borsa çan sesi) -->
+    <!-- Çan Sesi -->
     <audio id="alertSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
-    <!-- Kayarak Gelen Bildirim Balonu -->
-    <div id="toastMessage" class="toast">⚠️ DİKKAT: PİYASA ÇÖKÜYOR!</div>
+    <div id="toastMessage" class="toast">⚠️ BİLDİRİM EKRANI</div>
 
     <div class="sidebar">
         <div class="sidebar-header">ONS_AMETHYST MARKET</div>
         
         <div class="item-card">
-            <img src="ONS-AMETHYST.ico" width="24" height="24" alt="logo">
+            <!-- PNG formatına çevrilmiş logoyu çağırıyoruz -->
+            <img src="ONS-AMETHYST.png" width="24" height="24" alt="logo">
             <div>
                 <div class="item-title">AMETHYST BLOCK</div>
                 <div style="font-size: 11px; color: #787b86;">AMT / IRO</div>
@@ -62,20 +81,19 @@
         </div>
         
         <div class="sidebar-menu">
-            <button class="menu-btn" style="color: #26a69a; background: rgba(38, 166, 154, 0.15);">📊 Canlı Grafik</button>
-            <button class="menu-btn" onclick="alert('Cüzdan ve oyun içi senkronizasyon yakında aktif edilecek!')">💼 Cüzdanım (Yakında)</button>
-            <button class="menu-btn" onclick="alert('Piyasa ayarları menüsü yapım aşamasında.')">⚙️ Piyasa Ayarları</button>
+            <button class="menu-btn" id="btnGrafik" onclick="menuSec('btnGrafik', 'pageGrafik')" style="color: #26a69a; background: rgba(38, 166, 154, 0.15);">📊 Canlı Grafik</button>
+            <button class="menu-btn" id="btnCuzdan" onclick="menuSec('btnCuzdan', 'pageCuzdan')">💼 Cüzdanım (Yakında)</button>
+            <button class="menu-btn" id="btnAyarlar" onclick="menuSec('btnAyarlar', 'pageAyarlar')">⚙️ Piyasa Ayarları</button>
         </div>
 
         <div style="flex: 1;"></div>
 
-        <!-- YZ Tavsiyeler Kutusu -->
+        <!-- Yapay Zeka Tavsiyesi -->
         <div class="box-container">
             <div class="box-header">YZ TAVSİYESİ 🤖</div>
-            <div class="advice-text" id="aiAdvice">Analiz ediliyor...</div>
+            <div class="advice-text" id="aiAdvice">Piyasa analiz ediliyor...</div>
         </div>
 
-        <!-- İstatistikler Kutusu -->
         <div class="box-container">
             <div class="box-header">İSTATİSTİKLER 🔮</div>
             <div class="stat-row"><span class="stat-label">En Yüksek</span><span class="stat-val" style="color: #26a69a;" id="statHigh">--</span></div>
@@ -85,17 +103,52 @@
     </div>
 
     <div class="main-content">
-        <div class="info-header">
-            <div>
-                <h1 style="font-size: 20px; color: white;">ONS_AMETHYST / IRON INGOT</h1>
-                <span class="current-price" id="priceDisplay">5.00</span>
-                <span style="color: #787b86; font-weight: 600;"> DEMİR / ADET</span>
+        <!-- 1. Sayfa: GRAFİK EKRANI -->
+        <div id="pageGrafik" class="page-content active">
+            <div class="info-header">
+                <div>
+                    <h1 style="font-size: 20px; color: white; margin-bottom: 5px;">ONS_AMETHYST / IRON INGOT</h1>
+                    <span class="current-price" id="priceDisplay">5.00</span>
+                    <span style="color: #787b86; font-weight: 600;"> DEMİR / ADET</span>
+                </div>
+            </div>
+            <div class="chart-container"><canvas id="onsChart"></canvas></div>
+        </div>
+
+        <!-- 2. Sayfa: CÜZDAN EKRANI -->
+        <div id="pageCuzdan" class="page-content">
+            <div class="placeholder-text">
+                💼<br><br>Cüzdan Sistemi Yapım Aşamasında<br>
+                <span style="font-size: 14px; font-weight: normal; margin-top:10px; display:inline-block;">Yakında oyun içi hesaplar ile senkronize edilecek.</span>
             </div>
         </div>
-        <div class="chart-container"><canvas id="onsChart"></canvas></div>
+
+        <!-- 3. Sayfa: AYARLAR EKRANI -->
+        <div id="pageAyarlar" class="page-content">
+            <div class="placeholder-text">
+                ⚙️<br><br>Piyasa Ayarları Yakında Eklenecek
+            </div>
+        </div>
     </div>
 
     <script>
+        // Sol Menü Tıklama Sistemi
+        function menuSec(btnId, pageId) {
+            // Buton renklerini sıfırla
+            document.querySelectorAll('.menu-btn').forEach(btn => {
+                btn.style.color = '#a3a6af';
+                btn.style.background = 'transparent';
+            });
+            // Tıklanan butonu renklendir
+            const aktifBtn = document.getElementById(btnId);
+            aktifBtn.style.color = '#26a69a';
+            aktifBtn.style.background = 'rgba(38, 166, 154, 0.15)';
+
+            // Sayfaları gizle ve seçileni göster
+            document.querySelectorAll('.page-content').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
         const ctx = document.getElementById('onsChart').getContext('2d');
         const chart = new Chart(ctx, {
             type: 'line',
@@ -121,7 +174,7 @@
 
         let lastState = "STABLE";
 
-        // Mesaj Baloncuğu Gösterme Fonksiyonu
+        // Bildirim Balonu
         function showToast(message, color) {
             const toast = document.getElementById('toastMessage');
             const sound = document.getElementById('alertSound');
@@ -129,12 +182,14 @@
             toast.innerHTML = message;
             toast.style.borderLeftColor = color;
             toast.classList.add('show');
-            sound.play().catch(e => console.log("Ses oynatma engellendi"));
+            
+            // Kullanıcı sayfayla etkileşime girmeden ses çalmayabilir (Tarayıcı politikası)
+            sound.play().catch(e => console.log("Ses için sayfaya tıklanması gerekebilir."));
 
             setTimeout(() => { toast.classList.remove('show'); }, 4000);
         }
 
-        // 10 saniyede bir yeni tavsiye üret
+        // Rastgele Tavsiyeler (10 Saniyede Bir)
         setInterval(() => {
             const randomMsg = sentences[Math.floor(Math.random() * sentences.length)];
             document.getElementById('aiAdvice').innerText = `"${randomMsg}"`;
@@ -152,7 +207,7 @@
                 document.getElementById('statLow').innerText = data.stats.low;
                 document.getElementById('statVol').innerText = data.stats.vol.toLocaleString() + ' AMT';
 
-                // PUMP veya DUMP durumunda Bildirim Balonu Tetikleme
+                // PUMP / DUMP Algılayıcısı
                 if (data.state === 'PUMP' && lastState !== 'PUMP') {
                     showToast("🚀 YÜKSELİŞ BAŞLADI: Her şey artıyor, piyasayı izle!", "#26a69a");
                     priceEl.style.color = '#26a69a';
@@ -161,9 +216,7 @@
                     showToast("⚠️ AYI PİYASASI: Ani çöküş, hemen sat o ametisti!", "#ef5350");
                     priceEl.style.color = '#ef5350';
                     chart.data.datasets[0].borderColor = '#ef5350';
-                }
-
-                if (data.state === 'STABLE') {
+                } else if (data.state === 'STABLE') {
                     priceEl.style.color = '#ffffff';
                 }
 
