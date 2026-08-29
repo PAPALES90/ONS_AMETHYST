@@ -20,7 +20,7 @@
             animation: smoothSlideDown 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
         }
 
-        /* Tüm geçişler için pürüzsüz yukarıdan aşağı kayma animasyonu */
+        /* Tüm geçişler ve açılış için yukarıdan aşağı yumuşak süzülme */
         @keyframes smoothSlideDown { 
             from { opacity: 0; transform: translateY(-30px); }
             to { opacity: 1; transform: translateY(0); } 
@@ -60,18 +60,19 @@
         }
 
         /* Ametist Kartı Tasarımı */
-        .card-container { max-width: 650px; margin: 0 auto; width: 100%; }
-        .card-add-box { background: #1e222d; border: 1px solid #ab47bc; border-radius: 12px; padding: 20px; margin-bottom: 25px; text-align: center; }
-        .card-input { width: 70%; padding: 10px; background: #131722; border: 1px solid #2a2e39; color: white; border-radius: 6px; font-size: 14px; text-align: center; outline: none; }
-        .card-btn { padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #ab47bc; color: white; margin-left: 8px; transition: 0.2s; }
-        .card-btn:hover { opacity: 0.85; }
+        .card-container { max-width: 550px; margin: 0 auto; width: 100%; }
+        .ekleme-kutusu { background-color: #1a1a24; border: 1px solid #a252c8; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); margin-bottom: 25px; }
+        .ekleme-kutusu h3 { color: #a252c8; text-align: center; margin-bottom: 15px; }
+        .form-alani { display: flex; gap: 10px; }
+        .form-alani input { flex: 1; background-color: #121216; border: 1px solid #333; border-radius: 6px; color: white; padding: 10px; outline: none; }
+        .form-alani button { background-color: #a252c8; color: white; border: none; border-radius: 6px; padding: 10px 20px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .form-alani button:hover { background-color: #8c42ad; }
 
-        .member-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
-        .member-card { background: #1e222d; border: 1px solid #2a2e39; border-radius: 10px; padding: 15px; display: flex; align-items: center; gap: 12px; border-left: 4px solid #ab47bc; transition: transform 0.2s; }
-        .member-card:hover { transform: translateY(-3px); }
-        .member-avatar { width: 40px; height: 40px; border-radius: 6px; background: #2a2e39; }
-        .member-name { font-size: 15px; font-weight: bold; color: white; }
-        .member-badge { font-size: 11px; color: #ab47bc; font-weight: 600; }
+        .kart-item { display: flex; align-items: center; background-color: #1a1a24; padding: 15px; border-radius: 10px; margin-top: 10px; width: 100%; border-left: 5px solid #a252c8; box-sizing: border-box; transition: transform 0.2s; }
+        .kart-item:hover { transform: translateY(-2px); }
+        .kart-item img { width: 45px; height: 45px; border-radius: 8px; margin-right: 15px; background-color: #333; }
+        .kart-detay .isim { font-weight: bold; font-size: 16px; text-transform: uppercase; color: white; }
+        .kart-detay .rol { color: #a252c8; font-size: 12px; margin-top: 4px; }
 
         /* Admin Paneli Tasarımı */
         .admin-card { background: #1e222d; border: 1px solid #2a2e39; border-radius: 12px; padding: 30px; max-width: 500px; margin: 0 auto; width: 100%; text-align: center;}
@@ -137,24 +138,27 @@
         <!-- 2. AMETİST KARTI SAYFASI -->
         <div id="pageKart" class="page-content">
             <div class="card-container">
-                <h2 style="color: white; margin-bottom: 10px; text-align: center;">💳 Ametist Kartı Sahipleri</h2>
-                <p style="font-size: 13px; color: #787b86; text-align: center; margin-bottom: 20px;">Ametist Kartına sahip ayrıcalıklı oyuncuların listesi.</p>
+                <div class="baslik-alani" style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="color: white;">💳 Ametist Kartı Sahipleri</h2>
+                    <p style="color: #888; font-size: 14px; margin-top: 5px;">Ametist Kartına sahip ayrıcalıklı oyuncuların listesi.</p>
+                </div>
                 
-                <!-- Şifre Girildiğinde Açılan İsim Ekleme Kutusu -->
-                <div id="cardAddAdminSection" class="card-add-box" style="display: none;">
-                    <h4 style="color: #ab47bc; margin-bottom: 10px;">➕ Yeni Ametist Kart Sahibi Ekle</h4>
-                    <input type="text" id="newMemberInput" class="card-input" placeholder="Minecraft Oyuncu Adı">
-                    <button class="card-btn" onclick="kartSahibiEkle()">Karta Ekle</button>
+                <!-- Şifre Girilmediyse Gizli Kalacak Ekleme Formu -->
+                <div id="cardAddAdminSection" class="ekleme-kutusu" style="display: none;">
+                    <h3>+ Yeni Ametist Kart Sahibi Ekle</h3>
+                    <div class="form-alani">
+                        <input type="text" id="kullaniciInput" placeholder="Oyuncu Adı (Örn: Voxtare)">
+                        <button onclick="kartSahibiEkle()">Karta Ekle</button>
+                    </div>
                 </div>
 
-                <!-- Kart Sahipleri Listesi -->
-                <div class="member-list" id="memberList">
-                    <!-- Başlangıç Örnek Üyeleri -->
-                    <div class="member-card">
-                        <img class="member-avatar" src="https://crafatar.com/avatars/PAPALES90?size=40&overlay" alt="Skin">
-                        <div>
-                            <div class="member-name">PAPALES90</div>
-                            <div class="member-badge">💎 Kurucu / Kart Sahibi</div>
+                <!-- Kart Listesi -->
+                <div id="kartListesi">
+                    <div class="kart-item">
+                        <img src="https://crafatar.com/avatars/PAPALES90?size=45&overlay" alt="Skin" onerror="this.src='ONS-AMETHYST.png'">
+                        <div class="kart-detay">
+                            <div class="isim">PAPALES90</div>
+                            <div class="rol">💎 Kurucu / Kart Sahibi</div>
                         </div>
                     </div>
                 </div>
@@ -165,7 +169,7 @@
         <div id="pageAyarlar" class="page-content">
             <div class="admin-card">
                 <h2 style="color: white; margin-bottom: 10px;">🔒 Yönetici Girişi</h2>
-                <p style="font-size: 13px; color: #787b86;">Piyasa ve Ametist Kartı ayarlarını yönetmek için şifreyi girin.</p>
+                <p style="font-size: 13px; color: #787b86;">Piyasa ve Kart Ekleme yetkisini açmak için şifreyi girin.</p>
 
                 <div id="loginSection">
                     <input type="password" id="adminPassInput" class="admin-input" placeholder="Yönetici Şifreniz">
@@ -187,7 +191,7 @@
     <script>
         let isAdminLoggedIn = false;
 
-        // Smooth Sayfa Değiştirme Fonksiyonu
+        // Smooth Sayfa Değiştirme ve Animasyon
         function menuSec(btnId, pageId) {
             document.querySelectorAll('.menu-btn').forEach(btn => {
                 btn.style.color = '#a3a6af';
@@ -205,54 +209,53 @@
             hedefSayfa.classList.add('active');
         }
 
-        // Admin Girişi
+        // Şifre ile Yönetici Girişi
         function adminGirisYap() {
             const pass = document.getElementById('adminPassInput').value;
-            if (pass === "asvbnajknsgfkasgsf123") {
+            if (pass === "asvbnajknsgfaksgsf123") {
                 isAdminLoggedIn = true;
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('controlsSection').style.display = 'block';
                 document.getElementById('loginError').style.display = 'none';
                 
-                // Şifre doğru girilince Ametist Kartı ekleme kutusu görünür hale gelir
+                // Şifre doğruysa kart ekleme kutusu görünür hale gelir
                 document.getElementById('cardAddAdminSection').style.display = 'block';
-                showToast("Yönetici girişi başarılı! Kart ekleme yetkisi açıldı.", "#26a69a");
+                showToast("Giriş Başarılı! Ametist Kartı ekleme yetkisi açıldı.", "#26a69a");
             } else {
                 document.getElementById('loginError').style.display = 'block';
             }
         }
 
-        // Ametist Kartına Yeni İsim Ekleme
+        // Ametist Kartına Oyuncu Ekleme
         function kartSahibiEkle() {
             if (!isAdminLoggedIn) return;
 
-            const isimInput = document.getElementById('newMemberInput');
-            const oyuncuAdi = isimInput.value.trim();
+            const isimInput = document.getElementById("kullaniciInput");
+            const isim = isimInput.value.trim();
 
-            if (oyuncuAdi === "") {
-                alert("Lütfen bir oyuncu adı girin!");
+            if (isim === "") {
+                alert("İsim girmelisin aga!");
                 return;
             }
 
-            const memberList = document.getElementById('memberList');
+            const yeniKart = document.createElement("div");
+            yeniKart.className = "kart-item"; 
             
-            // Yeni Oyuncu Kartı Oluşturma
-            constyeniKart = document.createElement('div');
-            yeniKart.className = 'member-card';
+            // Crafatar ile skin çekme, bulamazsa ONS-AMETHYST.png koyma
             yeniKart.innerHTML = `
-                <img class="member-avatar" src="https://crafatar.com/avatars/${oyuncuAdi}?size=40&overlay" alt="Skin" onerror="this.src='https://crafatar.com/avatars/steve?size=40&overlay'">
-                <div>
-                    <div class="member-name">${oyuncuAdi}</div>
-                    <div class="member-badge">💳 VIP Ametist Kartı</div>
+                <img src="https://crafatar.com/avatars/${isim}?size=45&overlay" alt="Skin" onerror="this.src='ONS-AMETHYST.png'">
+                <div class="kart-detay">
+                    <div class="isim">${isim}</div>
+                    <div class="rol">💎 Ametist Kart Sahibi</div>
                 </div>
             `;
 
-            memberList.appendChild(yeniKart);
-            isimInput.value = "";
-            showToast(`${oyuncuAdi} Ametist Kartı sahiplerine eklendi!`, "#ab47bc");
+            document.getElementById("kartListesi").appendChild(yeniKart);
+            isimInput.value = ""; 
+            showToast(`${isim} listeye başarıyla eklendi!`, "#a252c8");
         }
 
-        // Admin Piyasa Müdahalesi
+        // Admin Piyasa Kontrolü
         async function piyasaMudahale(action) {
             const pass = document.getElementById('adminPassInput').value;
             try {
@@ -266,7 +269,7 @@
             } catch (err) { alert("Sunucu hatası!"); }
         }
 
-        // Grafik Ayarları
+        // Grafik Yapılandırması
         const ctx = document.getElementById('onsChart').getContext('2d');
         const chart = new Chart(ctx, {
             type: 'line',
@@ -277,18 +280,14 @@
             options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#2a2e39' } }, y: { grid: { color: '#2a2e39' } } } }
         });
 
-        // Bildirim Sistemi
+        // Bildirim Mesajları
         const sentences = [
             "Piyasa alev aldı, HERŞEY ARTIYOR HEMEN SAT O AMETİSTİ!",
             "Balinalar demir stokluyor, alım için beklemede kal.",
             "Fiyat diplerde dolaşıyor, dipten toplama zamanı olabilir.",
             "Panik satışı yapma, piyasa her an yukarı dönebilir.",
             "Trend yukarı yönlü, kemerleri bağlayın uçuyoruz!",
-            "Riskli sular... Şu an sadece izlemek en iyisi.",
-            "Demirlerini hazırla, büyük bir fırsat yaklaşıyor.",
-            "Ametist madencileri grevde! Fiyatlar uçabilir.",
-            "Piyasada yaprak kımıldamıyor, sabreden yatırımcı kazanır.",
-            "Ani çöküş riski var, kârını al ve hemen piyasadan çık!"
+            "Ametist madencileri grevde! Fiyatlar uçabilir."
         ];
 
         let lastState = "STABLE";
@@ -308,7 +307,7 @@
             document.getElementById('aiAdvice').innerText = `"${randomMsg}"`;
         }, 10000);
 
-        // Fiyat Çekme Sistemi
+        // Veri Çekme Fonksiyonu
         async function verileriCek() {
             try {
                 const response = await fetch('/api/price');
