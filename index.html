@@ -209,22 +209,24 @@
             hedefSayfa.classList.add('active');
         }
 
-        // Şifre ile Yönetici Girişi
-        function adminGirisYap() {
-            const pass = document.getElementById('adminPassInput').value;
-            if (pass === "asvbnajknsgfaksgsf123") {
-                isAdminLoggedIn = true;
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('controlsSection').style.display = 'block';
-                document.getElementById('loginError').style.display = 'none';
-                
-                // Şifre doğruysa kart ekleme kutusu görünür hale gelir
-                document.getElementById('cardAddAdminSection').style.display = 'block';
-                showToast("Giriş Başarılı! Ametist Kartı ekleme yetkisi açıldı.", "#26a69a");
-            } else {
-                document.getElementById('loginError').style.display = 'block';
-            }
-        }
+       // Şifre ile Yönetici Girişi
+function adminGirisYap() {
+    const inputField = document.getElementById('adminPassInput');
+    const pass = inputField.value.trim(); // Baştaki/sondaki boşlukları siler
+
+    if (pass === "asvbnajknsgfaksgsf123") {
+        isAdminLoggedIn = true;
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('controlsSection').style.display = 'block';
+        document.getElementById('loginError').style.display = 'none';
+        
+        // Ametist Kartı sayfasındaki ekleme kutusunu açar
+        document.getElementById('cardAddAdminSection').style.display = 'block';
+        showToast("Giriş Başarılı! Ametist Kartı ekleme yetkisi açıldı.", "#26a69a");
+    } else {
+        document.getElementById('loginError').style.display = 'block';
+    }
+}
 
         // Ametist Kartına Oyuncu Ekleme
         function kartSahibiEkle() {
