@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs'); // Dosya okuma/yazma modülü
+const fs = require('fs');
 const app = express();
 
 app.use(cors());
@@ -18,7 +18,7 @@ let data = {
     volume: 14250
 };
 
-// Eğer önceden kaydedilmiş veri varsa onu yükle (Sunucu çökse bile kaldığı yerden başlar)
+// Sunucu yeniden başlarsa eski verileri kurtar
 if (fs.existsSync(DATA_FILE)) {
     try {
         data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
@@ -31,6 +31,7 @@ let state = "STABLE";
 let trend = 0; 
 
 setInterval(() => {
+    // Trend ve dalgalanma hesaplamaları
     if (Math.random() < 0.15) trend = (Math.random() - 0.5) * 2;
 
     let volatility = (Math.random() - 0.5) * 0.4;
@@ -50,7 +51,7 @@ setInterval(() => {
     data.priceHistory.shift();
     data.priceHistory.push(data.currentPrice);
 
-    // Her döngüde veriyi dosyaya kaydet
+    // Her 2 saniyede bir veriyi dosyaya yaz (Sunucu kapansa da veri uçmaz)
     fs.writeFileSync(DATA_FILE, JSON.stringify(data));
 }, 2000);
 
