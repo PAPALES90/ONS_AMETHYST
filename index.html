@@ -141,26 +141,26 @@
                 <div id="walletConnectedSection" style="display: none;">
                     <div class="user-profile">
                         <!-- Crafatar servisi ile gerçek MC skin kafası çeker -->
-                        <img id="userHead" class="user-avatar" src="https://crafatar.com/avatars/steve?size=48&overlay" alt="Skin">
+                        <img id="userHead" class="user-avatar" src="" alt="Skin">
                         <div>
                             <div style="font-size: 12px; color: #787b86;">Bağlı Hesap</div>
-                            <div id="userNameDisplay" style="font-size: 18px; font-weight: bold; color: #fff;">Oyuncu</div>
+                            <div id="userNameDisplay" style="font-size: 18px; font-weight: bold; color: #fff;">Bekleniyor...</div>
                         </div>
                     </div>
 
                     <div class="inventory-grid">
                         <div class="inv-box">
                             <span style="font-size: 12px; color: #787b86;">Oyun İçi Demir Bakiyesi</span>
-                            <div class="inv-val" style="color: #e0e0e0;" id="userIron">64</div>
+                            <div class="inv-val" style="color: #e0e0e0;" id="userIron">0</div>
                         </div>
                         <div class="inv-box">
                             <span style="font-size: 12px; color: #787b86;">Ametist Stoku</span>
-                            <div class="inv-val" style="color: #ab47bc;" id="userAmethyst">12</div>
+                            <div class="inv-val" style="color: #ab47bc;" id="userAmethyst">0</div>
                         </div>
                     </div>
 
-                    <button class="wallet-btn" style="background: #26a69a;" onclick="alert('Alım emri Minecraft sunucusuna iletildi!')">⚡ 1 Adet Ametist Satın Al</button>
-                    <button class="wallet-btn" style="background: #ef5350;" onclick="alert('Satış emri Minecraft sunucusuna iletildi!')">💎 1 Adet Ametist Sat</button>
+                    <button class="wallet-btn" style="background: #26a69a;" onclick="alert('Alım emri (Şimdilik Yapım Aşamasında)')">⚡ 1 Adet Ametist Satın Al</button>
+                    <button class="wallet-btn" style="background: #ef5350;" onclick="alert('Satış emri (Şimdilik Yapım Aşamasında)')">💎 1 Adet Ametist Sat</button>
                 </div>
             </div>
         </div>
@@ -189,6 +189,7 @@
     </div>
 
     <script>
+        // Sayfa Değiştirme Fonksiyonu
         function menuSec(btnId, pageId) {
             document.querySelectorAll('.menu-btn').forEach(btn => {
                 btn.style.color = '#a3a6af';
@@ -202,24 +203,43 @@
             document.getElementById(pageId).classList.add('active');
         }
 
-        // Cüzdan Bağlantı Simülasyonu
-        function cuzdanBagla() {
-            const code = document.getElementById('walletCodeInput').value.trim();
-            if (code === "") {
+        // --- İŞTE EKLENEN GERÇEK CÜZDAN FONKSİYONU BURADA ---
+        async function cuzdanBagla() {
+            const kod = document.getElementById('walletCodeInput').value.trim();
+            if (kod === "") {
                 alert("Lütfen bir kod girin!");
                 return;
             }
 
-            // Test Kodun: AMT-989263
-            document.getElementById('walletLoginSection').style.display = 'none';
-            document.getElementById('walletConnectedSection').style.display = 'block';
+            try {
+                // Kodu Node.js sunucusuna soruyoruz
+                const response = await fetch(`/api/cuzdan/${kod}`);
+                const sonuc = await response.json();
 
-            // Oyuncu adını ve skinini bağla
-            const mockPlayerName = "Omer_Player"; 
-            document.getElementById('userNameDisplay').innerText = mockPlayerName;
-            document.getElementById('userHead').src = `https://crafatar.com/avatars/${mockPlayerName}?size=48&overlay`;
+                if (sonuc.durum === "bulundu") {
+                    // Kod doğruysa arayüzü gerçek verilerle güncelle
+                    document.getElementById('walletLoginSection').style.display = 'none';
+                    document.getElementById('walletConnectedSection').style.display = 'block';
+
+                    // Skript'ten gelen gerçek oyuncu adını ve envanteri yazdır
+                    const oyuncuAdi = sonuc.veri.oyuncu;
+                    document.getElementById('userNameDisplay').innerText = oyuncuAdi;
+                    document.getElementById('userHead').src = `https://crafatar.com/avatars/${oyuncuAdi}?size=48&overlay`;
+                    
+                    document.getElementById('userIron').innerText = sonuc.veri.demir;
+                    document.getElementById('userAmethyst').innerText = sonuc.veri.ametist;
+                    
+                    showToast("Bağlantı Başarılı! Envanter yüklendi.", "#26a69a");
+                } else {
+                    alert("Hatalı kod veya kodun süresi dolmuş!");
+                }
+            } catch (error) {
+                alert("Sunucuyla bağlantı kurulamadı. API çalışıyor mu?");
+            }
         }
+        // --------------------------------------------------
 
+        // Admin Girişi
         function adminGirisYap() {
             const pass = document.getElementById('adminPassInput').value;
             if (pass === "asvbnajknsgfkasgsf123") {
@@ -231,6 +251,7 @@
             }
         }
 
+        // Admin Piyasa Müdahalesi
         async function piyasaMudahale(action) {
             const pass = document.getElementById('adminPassInput').value;
             try {
@@ -244,6 +265,7 @@
             } catch (err) { alert("Sunucu hatası!"); }
         }
 
+        // Grafik Ayarları
         const ctx = document.getElementById('onsChart').getContext('2d');
         const chart = new Chart(ctx, {
             type: 'line',
@@ -254,6 +276,7 @@
             options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#2a2e39' } }, y: { grid: { color: '#2a2e39' } } } }
         });
 
+        // Bildirim Sistemi
         const sentences = [
             "Piyasa alev aldı, HERŞEY ARTIYOR HEMEN SAT O AMETİSTİ!",
             "Balinalar demir stokluyor, alım için beklemede kal.",
@@ -284,6 +307,7 @@
             document.getElementById('aiAdvice').innerText = `"${randomMsg}"`;
         }, 10000);
 
+        // Fiyat Çekme Sistemi
         async function verileriCek() {
             try {
                 const response = await fetch('/api/price');
